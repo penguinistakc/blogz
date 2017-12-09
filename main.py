@@ -6,7 +6,7 @@ app = Flask(__name__)
 #debug mode on
 app.config['DEBUG'] = True
 #mysql connection string
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://build-a-blog:blogme@localhost:8889/build-a-blog'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:blogzme@localhost:8889/blogz'
 #for mysql troubleshooting
 app.config['SQLALCHEMY_ECHO'] = True
 
@@ -23,11 +23,26 @@ class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(240))
     body = db.Column(db.String(480))
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     #class constructor -- we use title as a class variable because id will be autoincremented in db?
-    def __init__(self, title, body):
+    def __init__(self, title, body, owner):
         self.title = title
         self.body = body
+        self.owner = owner
+        
+
+class User(db.Model):
+    #primary key column -- id
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True)
+    username = db.Column(db.String(120))
+    #blogs list is populated with blogs from Blog with owner
+    blogs = db.relationship('Blog', backref='owner')
+
+    def __init__(self, email, password):
+        self.email = email
+        self.password = password
 
 def validate_title(title):
     has_data = title.strip()
