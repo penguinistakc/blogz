@@ -10,16 +10,18 @@
 
 {% block content %}
 <h1>Login to Blogz!</h1>
-<p>If you don't have an account, you may <a href="/register">register</a> for one.</p>
+<p>If you don't have an account, you may <a href="/signup">create</a> one.</p>
 <form action="/login" method="post">
         <table>
             <tr>
-                <td><label for="email">Email (optional):</label></td>
-                <td><input name="email" id="email" type="text" value="{{ email }}"/></td>
+                <td><label for="username">Username:</label></td>
+                <td><input name="username" id="username" type="text" value="{{ username }}"/>
+                    <span class="error">{{ username_error }}</span></td>
             </tr>
             <tr>
                 <td><label for="password">Password:</label></td>
-                <td><input name="password" id="password" type="password" /></td>
+                <td><input name="password" id="password" type="password" />
+                    <span class="error">{{ password_error }}</span></td>
             </tr>
         </table>
     <br />

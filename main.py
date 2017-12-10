@@ -35,13 +35,13 @@ class Blog(db.Model):
 class User(db.Model):
     #primary key column -- id
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True)
-    username = db.Column(db.String(120))
+    username = db.Column(db.String(120), unique=True)
+    password = db.Column(db.String(120))
     #blogs list is populated with blogs from Blog with owner
     blogs = db.relationship('Blog', backref='owner')
 
-    def __init__(self, email, password):
-        self.email = email
+    def __init__(self, username, password):
+        self.username = username
         self.password = password
 
 def validate_title(title):
@@ -73,10 +73,10 @@ def blog():
         posts = Blog.query.all()
         return render_template('blog.html',posts=posts,title='Build a Blog')
         
-    
-
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
+
+    owner = User.query.filter_by(username=session['username']).first()
     blog_title = ''
     blog_body = ''
     error_title = ''
@@ -85,10 +85,10 @@ def newpost():
         blog_title = request.form['blogTitle']
         blog_body = request.form['blogBody']
         if validate_title(blog_title) and validate_body(blog_body):
-            new_blog = Blog(blog_title, blog_body)
+            new_blog = Blog(blog_title, blog_body, owner)
             db.session.add(new_blog)
             db.session.commit()
-            print("--->>> THE NEW BLOG ID IS..." + str(new_blog.id))
+            #print("--->>> THE NEW BLOG ID IS..." + str(new_blog.id))
             return redirect('/blog?id=' + str(new_blog.id))
         else:
             if not validate_title(blog_title):
@@ -101,7 +101,63 @@ def newpost():
     #tasks = Task.query.filter_by(completed = False,owner=owner).all()
     #completed_tasks = Task.query.filter_by(completed = True,owner=owner).all()
  
-    return render_template('newpost.html',title='Get It Done!',blog_title=blog_title,blog_body=blog_body,error_title=error_title,error_body=error_body)
+    return render_template('newpost.html',title='Blogz',blog_title=blog_title,blog_body=blog_body,error_title=error_title,error_body=error_body)
+
+@app.route("/login", methods=['POST', 'GET'])
+def login():
+
+    username_error = ""
+    password_error = ""
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        '''
+        return user data from database (User table). We expect only one email (since it is unique), so tell it to return the first record
+        it finds (this is equivalent to a fetch 1 rows statement in db2). This statement ends the query after the first email is found,
+        rather than completing the table scan - so it may save us a few cpu cycles.
+        '''
+        user = User.query.filter_by(username=username).first()
+        #if there is a user, and user.password == the password from the form, let the user login
+
+        if user and user.password == password:
+            #TODO - "remember" that the user has logged in
+            session['username'] = username
+            flash("Logged In")
+            return redirect('/newpost')
+        else:
+            if not user:
+                username_error = "User does not exist, please re-enter or register for new account"
+            else:
+                password_error = "Password is incorrect, please re-enter"
+
+    return render_template('login.html',username_error=username_error,password_error=password_error)
+
+@app.route("/signup", methods=['POST', 'GET'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        verify = request.form['verifyPassword']
+
+        #TODO - validate user data
+
+        existing_user = User.query.filter_by(username=username).first()
+        if not existing_user:
+            new_user = User(username, password)
+            db.session.add(new_user)
+            db.session.commit()
+            #TODO - remember the user
+            session['username'] = username
+            return redirect('/newpost')
+        else:
+            #TODO - user better response messaging
+            flash('This user already exists', 'error')
+    
+    return render_template("signup.html")
+
+
+
+
 
 if __name__ == '__main__':
     app.run()
