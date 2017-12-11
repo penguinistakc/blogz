@@ -1,6 +1,9 @@
 /* stylesheet for build-a-blog project 
    Matthew G. Copple
 */
+ul {
+    list-style: none;
+}
 .error {
     color: red;
     list-style: none;

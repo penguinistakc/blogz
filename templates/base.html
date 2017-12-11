@@ -7,10 +7,28 @@
     <body>
 
         <div>
+            <a href='/'>Home</a>
+            &nbsp;
+            &nbsp;
+            <a href='/login'>Login</a>
+            &nbsp;
+            &nbsp;
             <a href='/blog'>Main Blog Page</a>
             &nbsp;
             &nbsp;
             <a href='/newpost'>Add a Blog Entry</a>
+            &nbsp;
+            &nbsp;
+            <a href='/logout'>Logout</a>
+        </div>
+        <div>
+            {% with messages = get_flashed_messages(with_categories=True) %}
+            <ul>
+                {% for category, message in messages %}
+                <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endwith %}
         </div>
 
         <!-- define a block for child template -->

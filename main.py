@@ -44,6 +44,13 @@ class User(db.Model):
         self.username = username
         self.password = password
 
+@app.before_request
+def require_login():
+    #allowed routes
+    allowed_routes = ['login','list_blogs','signup','index']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect('/login')
+
 def validate_title(title):
     has_data = title.strip()
     if not has_data:
@@ -62,16 +69,20 @@ def validate_body(body):
     return True
 
 @app.route('/blog', methods=['POST', 'GET'])
-def blog():
+def list_blogs():
 
     post_id = request.args.get('id')
+    user = request.args.get('user')
     if post_id:
-        #int_id = int(form_value)
         post = Blog.query.filter_by(id=post_id).first()
         return render_template('blog_entry.html',post=post)
+    elif user:
+        user_id = User.query.filter_by(username=user).first()
+        posts = Blog.query.filter_by(owner_id=user_id.id).all()
+        return render_template('blog.html',posts=posts,title='Blogz')
     else:
         posts = Blog.query.all()
-        return render_template('blog.html',posts=posts,title='Build a Blog')
+        return render_template('blog.html',posts=posts,title='Blogz')
         
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():
@@ -106,8 +117,7 @@ def newpost():
 @app.route("/login", methods=['POST', 'GET'])
 def login():
 
-    username_error = ""
-    password_error = ""
+    username = ''
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -126,34 +136,99 @@ def login():
             return redirect('/newpost')
         else:
             if not user:
-                username_error = "User does not exist, please re-enter or register for new account"
+                user_error = 'User {} does not exist, please re-enter or register for new account'.format(username)
+                flash(user_error, 'error')
+                username = ''
             else:
-                password_error = "Password is incorrect, please re-enter"
+                flash('Password is incorrect, please re-enter', 'error')
+                
 
-    return render_template('login.html',username_error=username_error,password_error=password_error)
+    return render_template('login.html',username=username)
+
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('/blog')
 
 @app.route("/signup", methods=['POST', 'GET'])
 def register():
+    username = ''
+    
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         verify = request.form['verifyPassword']
 
         #TODO - validate user data
-
-        existing_user = User.query.filter_by(username=username).first()
-        if not existing_user:
-            new_user = User(username, password)
-            db.session.add(new_user)
-            db.session.commit()
-            #TODO - remember the user
-            session['username'] = username
-            return redirect('/newpost')
-        else:
-            #TODO - user better response messaging
-            flash('This user already exists', 'error')
+        if validate_signup(username, password, verify):
+            existing_user = User.query.filter_by(username=username).first()
+            if not existing_user:
+                new_user = User(username, password)
+                db.session.add(new_user)
+                db.session.commit()
+                #TODO - remember the user
+                session['username'] = username
+                return redirect('/newpost')
+            else:
+                #TODO - user better response messaging
+                user_error = 'User {} already exists'.format(username)
+                flash(user_error, 'error')
+                username = ''
     
-    return render_template("signup.html")
+    return render_template('signup.html',username=username)
+
+@app.route("/")
+def index():
+    users = User.query.all()
+    return render_template('index.html',users=users)
+
+def validate_signup(username, password, verification):
+    validated = True
+    if field_not_empty(username) and field_not_empty(password) and field_not_empty(verification):
+        if not validate_username(username):
+            validated = False
+        if not validate_password(password, verification):
+            validated = False
+    else:
+        flash('One or more fields are invalid - all three fields must be populated', 'error')
+        validated = False
+
+    return validated
+
+def validate_username(username):
+    if field_has_min_chars(username):
+        return True
+    else:
+        flash('Username must have at least 3 characters. Please re-enter.','error')
+    return False
+
+def validate_password(password, verify):
+    if field_has_min_chars(password):
+        if verify == password:
+            return True
+        else:
+            flash('Passwords do not match','error')
+            
+    else:
+        flash('Password must have at least 3 characters','error')
+
+
+    return False
+
+def field_not_empty(data):
+    has_data = data.strip()
+    if has_data:
+        return True
+
+    return False
+
+def field_has_min_chars(data):
+    has_data = data.strip()
+    if len(has_data) < 3:
+        return False
+
+    return True
+
 
 
 
