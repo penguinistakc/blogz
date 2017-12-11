@@ -51,22 +51,6 @@ def require_login():
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
-def validate_title(title):
-    has_data = title.strip()
-    if not has_data:
-        #flash('Your blog entry requires a title!', 'error')
-        return False
-            
-    return True
-
-def validate_body(body):
-    has_data = body.strip()
-    if not has_data:
-        #flash('You forgot the blog entry!', 'error')
-        return False
-        
-
-    return True
 
 @app.route('/blog', methods=['POST', 'GET'])
 def list_blogs():
@@ -103,10 +87,10 @@ def newpost():
             return redirect('/blog?id=' + str(new_blog.id))
         else:
             if not validate_title(blog_title):
-                error_title = 'You need a title for your blog entry!'
+                flash('You need a title for your blog entry!','error')
             
             if not validate_body(blog_body):
-                error_body = 'You need content for your blog entry!'
+                flash('You need content for your blog entry!','error')
 
     #tasks = Task.query.all()
     #tasks = Task.query.filter_by(completed = False,owner=owner).all()
@@ -229,7 +213,22 @@ def field_has_min_chars(data):
 
     return True
 
+def validate_title(title):
+    has_data = title.strip()
+    if not has_data:
+        #flash('Your blog entry requires a title!', 'error')
+        return False
+            
+    return True
 
+def validate_body(body):
+    has_data = body.strip()
+    if not has_data:
+        #flash('You forgot the blog entry!', 'error')
+        return False
+        
+
+    return True
 
 
 

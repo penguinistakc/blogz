@@ -2,32 +2,41 @@
 <html>
     <head>
         <title>{{title}}</title>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='stylesheet.css')}}">
+        <style>
+            body {font-family: Arial, Helvetica, sans-serif; background: #eee; width: 800px; margin: 0 auto; padding: 10px; }
+            nav ul {padding: 0; display: inline-block;  }
+            nav ul li {list-style: none; display: inline-block; margin-right: 15px;}
+            nav #user-login {float: right;}
+            ul {list-style: none; }
+            .author {font-style: italic; font-size: 12px;}
+            .title {font-style: bold; font-size: 20px}
+            .post {font-size: 17px}
+            .error {background: #f0d6d6; padding: .5em; border: 1px solid #aacbe2; color: red; font-style: bold}
+        </style>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css')}}" />
     </head>
     <body>
-
-        <div>
-            <a href='/'>Home</a>
-            &nbsp;
-            &nbsp;
-            <a href='/login'>Login</a>
-            &nbsp;
-            &nbsp;
-            <a href='/blog'>Main Blog Page</a>
-            &nbsp;
-            &nbsp;
-            <a href='/newpost'>Add a Blog Entry</a>
-            &nbsp;
-            &nbsp;
-            <a href='/logout'>Logout</a>
+        <header>
+            <nav>
+                <ul id='user-login'>
+                <li><a href='/login'>Login</a></li>
+                <li><a href='/logout'>Logout</a></li>
+                </ul>
+                <ul>
+                <li><a href='/'>Home</a></li>
+                <li><a href='/blog'>All Blog Posts</a></li>
+                <li><a href='/newpost'>Add a Blog Entry</a></li>
+                </ul>
+            </nav>
+            
         </div>
         <div>
             {% with messages = get_flashed_messages(with_categories=True) %}
-            <ul>
+            
                 {% for category, message in messages %}
-                <li class="{{ category }}">{{ message }}</li>
+                <p class="{{ category }}">{{ message }}</p>
                 {% endfor %}
-            </ul>
+          
             {% endwith %}
         </div>
 

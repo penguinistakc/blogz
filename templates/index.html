@@ -1,11 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
+<h1>Our Featured Authors</h1>
 {% if users|length == 0 %}
 <p>No users yet</p>
 {% else %}
 {% for user in users %}
-<a href="./blog?user={{user.username}}"><h2>{{user.username}}</h2></a>
-<hr />
+<a href="./blog?user={{user.username}}">
+    <ul>
+        <li>{{user.username}}</li>
+    </ul>
+</a>
 {% endfor %}
 {% endif %}
 {% endblock %}
