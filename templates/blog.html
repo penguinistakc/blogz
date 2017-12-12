@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-        <h1>All Blog Posts</h1>
+        <h1>{{ blog_user }} Blog Posts</h1>
         {% if posts|length == 0 %}
             <p>No posts yet</p>
         {% else %}

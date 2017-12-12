@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
 
 
+
 app = Flask(__name__)
 #debug mode on
 app.config['DEBUG'] = True
@@ -30,6 +31,7 @@ class Blog(db.Model):
         self.title = title
         self.body = body
         self.owner = owner
+
         
 
 class User(db.Model):
@@ -47,7 +49,7 @@ class User(db.Model):
 @app.before_request
 def require_login():
     #allowed routes
-    allowed_routes = ['login','list_blogs','signup','index']
+    allowed_routes = ['login','list_blogs','signup','index', 'static']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
@@ -63,10 +65,10 @@ def list_blogs():
     elif user:
         user_id = User.query.filter_by(username=user).first()
         posts = Blog.query.filter_by(owner_id=user_id.id).all()
-        return render_template('blog.html',posts=posts,title='Blogz')
+        return render_template('blog.html',posts=posts,title='Blogz',blog_user=user)
     else:
         posts = Blog.query.all()
-        return render_template('blog.html',posts=posts,title='Blogz')
+        return render_template('blog.html',posts=posts,title='Blogz',blog_user='All')
         
 @app.route('/newpost', methods=['POST', 'GET'])
 def newpost():

@@ -2,17 +2,12 @@
    Matthew G. Copple
 */
 
-body { font-family: sans-serif; background: #eeee;}
-
-ul {
-    list-style: none;
-}
-.error {
-    color: red;
-    list-style: none;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-h1 {
-    text-align: center;
-}
+body {font-family: Arial, Helvetica, sans-serif; background: #eee; width: 800px; margin: 0 auto; padding: 10px; }
+nav ul {padding: 0; display: inline-block;  }
+nav ul li {list-style: none; display: inline-block; margin-right: 15px;}
+nav #user-login {float: right;}
+ul {list-style: none; }
+.author {font-style: italic; font-size: 12px;}
+.title {font-style: bold; font-size: 20px}
+.post {font-size: 17px}
+.error {background: #f0d6d6; padding: .5em; border: 1px solid #aacbe2; color: red; font-style: bold}
