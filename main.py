@@ -1,5 +1,6 @@
 from flask import Flask, request, redirect, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy
+from hashutils import make_pw_hash, check_pw_hash
 
 
 
@@ -44,12 +45,12 @@ class User(db.Model):
 
     def __init__(self, username, password):
         self.username = username
-        self.password = password
+        self.password = make_pw_hash(password)
 
 @app.before_request
 def require_login():
     #allowed routes
-    allowed_routes = ['login','list_blogs','signup','index', 'static']
+    allowed_routes = ['login','list_blogs','signup','index','static']
     if request.endpoint not in allowed_routes and 'username' not in session:
         return redirect('/login')
 
@@ -115,7 +116,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         #if there is a user, and user.password == the password from the form, let the user login
 
-        if user and user.password == password:
+        if user and check_pw_hash(password, user.password):
             #TODO - "remember" that the user has logged in
             session['username'] = username
             flash("Logged In")
@@ -137,7 +138,7 @@ def logout():
     return redirect('/blog')
 
 @app.route("/signup", methods=['POST', 'GET'])
-def register():
+def signup():
     username = ''
     
     if request.method == 'POST':
